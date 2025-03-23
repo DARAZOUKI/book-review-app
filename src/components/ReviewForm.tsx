@@ -20,7 +20,7 @@ const ReviewForm = ({ bookId, setReviews }: { bookId: string; setReviews: any })
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/review",
+        "https://backend-bookreviewapp.onrender.com/review",
         { bookId, reviewText, rating, username },
         { headers: { Authorization: `Bearer ${token}` } }
       );

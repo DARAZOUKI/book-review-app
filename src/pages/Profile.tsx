@@ -21,7 +21,7 @@ const Profile = () => {
 
     const fetchReviews = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/review/my-reviews", {
+        const response = await axios.get("https://backend-bookreviewapp.onrender.com/review/my-reviews", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setReviews(response.data);
@@ -35,7 +35,7 @@ const Profile = () => {
 
   const deleteReview = async (reviewId: string) => {
     try {
-      await axios.delete(`http://localhost:5000/review/${reviewId}`, {
+      await axios.delete(`https://backend-bookreviewapp.onrender.com/review/${reviewId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -52,7 +52,7 @@ const Profile = () => {
 
     try {
       await axios.put(
-        `http://localhost:5000/review/${editingReviewId}`,
+        `https://backend-bookreviewapp.onrender.com/review/${editingReviewId}`,
         { reviewText: editReviewText, rating: editRating },
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -37,7 +37,7 @@ const ReviewList = ({ reviews, setReviews }: { reviews: any[]; setReviews: any }
 
     try {
       await axios.put(
-        `http://localhost:5000/review/${reviewId}`,
+        `https://backend-bookreviewapp.onrender.com/review/${reviewId}`,
         { reviewText: editedReviewText, rating: editedRating },
         { headers: { Authorization: `Bearer ${token}` } }
       );

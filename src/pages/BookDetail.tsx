@@ -30,7 +30,7 @@ const BookDetail = () => {
         setBook(bookResponse.data);
   
         // Fetch reviews from your backend
-        const reviewResponse = await axios.get(`http://localhost:5000/review/book/${id}`, {
+        const reviewResponse = await axios.get(`https://backend-bookreviewapp.onrender.com/review/book/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         
