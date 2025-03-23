@@ -14,7 +14,7 @@ const ReviewList = ({ reviews, setReviews }: { reviews: any[]; setReviews: any }
     if (!token) return;
 
     try {
-      await axios.delete(`http://localhost:5000/review/${reviewId}`, {
+      await axios.delete(`https://backend-bookreviewapp.onrender.com/review/${reviewId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
