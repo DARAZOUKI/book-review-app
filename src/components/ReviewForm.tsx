@@ -1,4 +1,4 @@
-import { Card, CardContent, TextField, Button, Typography, Box } from "@mui/material";
+import { Card, CardContent, TextField, Button, Typography, Box, CircularProgress, Alert } from "@mui/material";
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +7,9 @@ const ReviewForm = ({ bookId, setReviews }: { bookId: string; setReviews: any })
   const navigate = useNavigate();
   const [reviewText, setReviewText] = useState("");
   const [rating, setRating] = useState(5);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const submitReview = async () => {
     const token = localStorage.getItem("token");
@@ -18,6 +21,22 @@ const ReviewForm = ({ bookId, setReviews }: { bookId: string; setReviews: any })
       return;
     }
 
+    if (!reviewText.trim()) {
+      setError("Review text is required.");
+      setSuccess('');
+      return;
+    }
+
+    if (rating < 1 || rating > 5) {
+      setError("Rating must be between 1 and 5.");
+      setSuccess('');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
     try {
       const response = await axios.post(
         "https://backend-bookreviewapp.onrender.com/review",
@@ -25,12 +44,15 @@ const ReviewForm = ({ bookId, setReviews }: { bookId: string; setReviews: any })
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert("Review submitted!");
       setReviewText("");
       setRating(5);
+      setSuccess("Your review was submitted successfully!");
       setReviews((prevReviews: any) => [...prevReviews, { ...response.data, username }]);
-    } catch (error) {
+    } catch (error: any) {
+      setError("Failed to submit review. Please try again.");
       console.error("Error submitting review:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,11 +83,21 @@ const ReviewForm = ({ bookId, setReviews }: { bookId: string; setReviews: any })
           sx={{ my: 1 }}
         />
 
+        {/* Alerts */}
+        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+        {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
+        {loading && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <CircularProgress color="primary" />
+          </Box>
+        )}
+
         <Box sx={{ textAlign: "center", mt: 2 }}>
           <Button
             variant="contained"
             color="primary"
             onClick={submitReview}
+            disabled={loading}
             sx={{
               width: "100%",
               py: 1,

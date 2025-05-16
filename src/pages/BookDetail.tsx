@@ -4,7 +4,7 @@ import axios from "axios";
 import BookInfo from "../components/BookInfo";
 import ReviewList from "../components/ReviewList";
 import ReviewForm from "../components/ReviewForm";
-import { Box, Container, Typography, Button } from "@mui/material";
+import { Box, Container, Typography, Button, CircularProgress, Alert } from "@mui/material";
 
 const BookDetail = () => {
   const { id } = useParams();
@@ -16,32 +16,32 @@ const BookDetail = () => {
   const [book, setBook] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!id) return;
-  
+
     const fetchBookAndReviews = async () => {
       try {
         setLoading(true);
-  
-        // Fetch book details from Google Books API
+        setError("");
+
         const bookResponse = await axios.get(`https://www.googleapis.com/books/v1/volumes/${id}`);
         setBook(bookResponse.data);
-  
-        // Fetch reviews from your backend
+
         const reviewResponse = await axios.get(`https://backend-bookreviewapp.onrender.com/review/book/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        
+
         setReviews(reviewResponse.data);
       } catch (error) {
         console.error("Error fetching book or reviews:", error);
+        setError("Failed to load book details or reviews.");
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchBookAndReviews();
   }, [id]);
 
@@ -57,7 +57,6 @@ const BookDetail = () => {
         marginTop: "20px",
       }}
     >
-      {/* Back Button */}
       <Button
         onClick={() => navigate(-1)}
         sx={{
@@ -69,24 +68,31 @@ const BookDetail = () => {
         ⬅ Back
       </Button>
 
-      {/* Book Info */}
-      {id && <BookInfo id={id} />}
+      {/* Loading Spinner */}
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <CircularProgress color="primary" />
+        </Box>
+      )}
 
-      {/* Reviews Section */}
-      <Typography variant="h5" sx={{ marginTop: "20px", fontWeight: "bold", borderBottom: "2px solid #ffcc00", paddingBottom: "5px" }}>
-        Reviews
-      </Typography>
-      <ReviewList  reviews={reviews} setReviews={setReviews} />
+      {/* Error Message */}
+      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
 
-      {/* Review Form */}
-      <Typography variant="h6" sx={{ marginTop: "20px", fontWeight: "bold" }}>
-    
-      </Typography>
-      <ReviewForm bookId={id!} setReviews={setReviews} />
+      {/* Content */}
+      {!loading && !error && id && (
+        <>
+          <BookInfo id={id} />
+
+          <Typography variant="h5" sx={{ marginTop: "20px", fontWeight: "bold", borderBottom: "2px solid #ffcc00", paddingBottom: "5px" }}>
+            Reviews
+          </Typography>
+
+          <ReviewList reviews={reviews} setReviews={setReviews} />
+          <ReviewForm bookId={id!} setReviews={setReviews} />
+        </>
+      )}
     </Container>
   );
 };
 
 export default BookDetail;
-
-

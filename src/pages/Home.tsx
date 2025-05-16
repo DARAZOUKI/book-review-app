@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { TextField, Button, Grid, Card, CardContent, Typography, CardMedia, Box, Container } from "@mui/material";
+import { TextField, Button, Grid, Card, CardContent, Typography, CardMedia, Box, Container, CircularProgress, Alert } from "@mui/material";
 
 const Home = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
-  const initialQuery = searchParams.get("q") || ""; 
+  const initialQuery = searchParams.get("q") || "";
 
   const [query, setQuery] = useState(initialQuery);
   const [books, setBooks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (query) {
@@ -20,20 +22,26 @@ const Home = () => {
 
   const searchBooks = async (searchTerm: string) => {
     if (!searchTerm.trim()) return;
+
+    setLoading(true);
+    setError('');
     try {
       const response = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${searchTerm}`);
       setBooks(response.data.items || []);
       navigate(`/?q=${searchTerm}`);
     } catch (error) {
       console.error("Error fetching books:", error);
+      setError("Failed to fetch books. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
+
   const handleSearch = () => {
     if (!query.trim()) return;
     navigate(`/?q=${query}`);
     searchBooks(query);
   };
-  
 
   return (
     <Box
@@ -45,7 +53,6 @@ const Home = () => {
       }}
     >
       <Container maxWidth="lg">
-        {/* Title Section */}
         <Typography
           variant="h3"
           sx={{
@@ -60,7 +67,6 @@ const Home = () => {
           Find Your Next Favorite Book 📖✨
         </Typography>
 
-        {/* Search Bar */}
         <Box
           sx={{
             display: "flex",
@@ -103,13 +109,19 @@ const Home = () => {
               "&:hover": { background: "#FFC107" },
             }}
             onClick={handleSearch}
-
           >
             Search
           </Button>
         </Box>
 
-        {/* Books Grid */}
+        {/* Alerts and Loading */}
+        {loading && (
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+            <CircularProgress color="primary" />
+          </Box>
+        )}
+        {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+
         <Grid container spacing={3}>
           {books.map((book) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={book.id}>
